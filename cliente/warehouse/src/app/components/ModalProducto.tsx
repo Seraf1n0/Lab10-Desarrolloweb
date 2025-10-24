@@ -1,6 +1,7 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Product } from "../types/Product";
+import { fetchProductById } from "../services/api";
 import styles from "../styles/ModalProducto.module.css";
 
 interface ModalProductoProps {
@@ -17,6 +18,26 @@ export default function ModalProducto({
   formato,
 }: ModalProductoProps) {
   const [showRaw, setShowRaw] = useState(false);
+  const [rawData, setRawData] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+
+  // Cuando cargue el modal hacemos el fetch del detalle del producto
+  useEffect(() => {
+    if (isOpen && producto) {
+      setLoading(true);
+      fetchProductById(producto.id, formato)
+        .then(({ rawData }) => {
+          setRawData(rawData);
+        })
+        .catch((error) => {
+          console.error("Error loading product details:", error);
+          setRawData("Error cargando datos del producto");
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
+  }, [isOpen, producto?.id, formato]);
 
   if (!isOpen || !producto) return null;
 
@@ -25,26 +46,6 @@ export default function ModalProducto({
       style: "currency",
       currency: "USD",
     }).format(price);
-  };
-
-  // Generar rawData basado en el formato seleccionado
-  const generateRawData = () => {
-    if (formato === "json") {
-      return JSON.stringify(producto, null, 2);
-    } else {
-      return `<?xml version="1.0" encoding="UTF-8"?>
-<product>
-  <id>${producto.id}</id>
-  <sku>${producto.sku}</sku>
-  <name><![CDATA[${producto.name}]]></name>
-  <description><![CDATA[${producto.description}]]></description>
-  <price>${producto.price}</price>
-  <category>${producto.category}</category>
-  <stock>${producto.stock}</stock>
-  <createdAt>${producto.createdAt}</createdAt>
-  <updatedAt>${producto.updatedAt}</updatedAt>
-</product>`;
-    }
   };
 
   return (
@@ -74,7 +75,13 @@ export default function ModalProducto({
 
         <div className={styles.content}>
           {showRaw ? (
-            <pre className={styles.rawData}>{generateRawData()}</pre>
+            <div>
+              {loading ? (
+                <div>Cargando datos...</div>
+              ) : (
+                <pre className={styles.rawData}>{rawData}</pre>
+              )}
+            </div>
           ) : (
             <div className={styles.details}>
               <div className={styles.field}>
