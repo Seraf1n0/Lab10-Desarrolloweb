@@ -1,0 +1,877 @@
+{
+	"info": {
+		"_postman_id": "5bb191e3-5c61-4049-adb5-25e9ed761f96",
+		"name": "API-REST Fastify (Local)",
+		"description": "Colección de pruebas para API Fastify con API Key y JWT",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "41292777"
+	},
+	"item": [
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Login Admin - 200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 200', () => pm.response.code === 200);",
+									"const json = pm.response.json();",
+									"pm.expect(json).to.have.property('data');",
+									"pm.expect(json.data).to.have.property('token');",
+									"pm.collectionVariables.set('token', json.data.token);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "{{apiKey}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\",\n  \"apiKey\": \"{{apiKey}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/usuarios/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"usuarios",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Esta solicitud POST se utiliza para la autenticación de usuarios (inicio de sesión).\n\n**URL del endpoint:**\n`{{baseUrl}}/api/usuarios/auth/login`\n\n**Encabezados requeridos:**\n- `x-api-key`: Clave de API para autenticación (usa la variable de entorno `{{apiKey}}`)\n- `Content-Type`: `application/json`\n\n**Parámetros del cuerpo (JSON):**\n- `username`: Nombre de usuario (por ejemplo, \"admin\")\n- `password`: Contraseña del usuario (por ejemplo, \"admin123\")\n- `apiKey`: Clave de API (usa la variable de entorno `{{apiKey}}`)\n\n**Respuesta esperada:**\n- Código HTTP 200 si el inicio de sesión es exitoso\n- Respuesta en formato JSON que contiene un objeto `data` con una propiedad `token`\n- El token se almacena como variable de colección `token` para ser utilizado en solicitudes posteriores."
+					},
+					"response": []
+				},
+				{
+					"name": "Login Viewer - 200 (para probar 403)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 200', () => pm.response.code === 200);",
+									"const json = pm.response.json();",
+									"pm.collectionVariables.set('viewerToken', json.data.token);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "{{apiKey}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"viewer\",\n  \"password\": \"viewer123\",\n  \"apiKey\": \"{{apiKey}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/usuarios/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"usuarios",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Esta solicitud POST permite autenticar a un usuario enviando su nombre de usuario, contraseña y clave de API al endpoint '{{baseUrl}}/api/usuarios/auth/login'.\n\nEncabezados requeridos:\n- x-api-key: Clave de API para autorización (usar la variable de entorno '{{apiKey}}').\n- Content-Type: application/json.\n\nParámetros del cuerpo (body):\n- username: Nombre de usuario.\n- password: Contraseña del usuario.\n- apiKey: Clave de API (usar la variable '{{apiKey}}').\n\nRespuesta esperada:\n- Código HTTP 200 si la autenticación es exitosa.\n- El cuerpo de la respuesta incluye un token en 'data.token', que se guarda como la variable de colección 'viewerToken' para futuras solicitudes autenticadas."
+					},
+					"response": []
+				},
+				{
+					"name": "Login - 401 Invalid credentials",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 401', () => pm.response.code === 401);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "{{apiKey}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"admin\",\n  \"password\": \"wrong\",\n  \"apiKey\": \"{{apiKey}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/usuarios/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"usuarios",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Esta solicitud POST se utiliza para autenticar a un usuario enviando sus credenciales al endpoint de inicio de sesión en '{{baseUrl}}/api/usuarios/auth/login'.\n\nEncabezados requeridos:\n- x-api-key: Clave API para autorización.\n- Content-Type: application/json.\n\nParámetros del cuerpo de la solicitud (JSON):\n- username: Nombre de usuario (por ejemplo, 'admin').\n- password: Contraseña del usuario.\n- apiKey: Clave API.\n\nRespuesta esperada:\n- 200 OK si la autenticación es exitosa.\n- Actualmente, la prueba verifica el estado 401 Unauthorized cuando las credenciales son inválidas."
+					},
+					"response": []
+				},
+				{
+					"name": "Login - 400 Missing fields",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 400', () => pm.response.code === 400);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "{{apiKey}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \"username\": \"admin\" }"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/usuarios/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"usuarios",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Esta solicitud POST se utiliza para autenticar a un usuario enviando sus credenciales al endpoint de inicio de sesión. \n\n**Encabezados requeridos:**\n- `x-api-key`: Clave de API necesaria para la autenticación.\n- `Content-Type`: Debe establecerse en `application/json`.\n\n**Cuerpo de la solicitud:**\nEl cuerpo debe estar en formato JSON e incluir los siguientes parámetros:\n- `username`: Nombre de usuario (cadena de texto, obligatorio).\n- `password`: Contraseña del usuario (cadena de texto, obligatorio).\n\n**Respuesta esperada:**\n- Si la autenticación es exitosa, el servidor responderá con un código de estado 200.\n- Si faltan campos requeridos o las credenciales son incorrectas, se devolverá un código de estado 400."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Products",
+			"item": [
+				{
+					"name": "List products - 200 (JSON)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 200', () => pm.response.code === 200);",
+									"const json = pm.response.json();",
+									"pm.expect(json.data).to.have.property('products');",
+									"pm.expect(json.data.pagination).to.have.property('total');"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "{{apiKey}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/productos?page=1&limit=2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"productos"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "2"
+								}
+							]
+						},
+						"description": "Este endpoint permite obtener una lista paginada de productos disponibles en el sistema.\n\nEncabezados requeridos:\n- x-api-key: Clave de API para autenticación y autorización.\n\nParámetros de consulta:\n- page: Número de página para la paginación (entero, opcional, por defecto 1).\n- limit: Cantidad máxima de productos a devolver por página (entero, opcional, por defecto 2).\n\nFormato de respuesta esperada:\nLa respuesta es un objeto JSON que contiene dos propiedades principales:\n- data.products: Un arreglo con los productos obtenidos en la página solicitada.\n- data.pagination: Un objeto con información de paginación, incluyendo el total de productos disponibles.\n\nCódigos de estado HTTP posibles:\n- 200 OK: La solicitud fue exitosa y se retornan los productos.\n- 400 Bad Request: Parámetros de consulta inválidos.\n- 401 Unauthorized: Falta o es inválida la clave de API.\n- 500 Internal Server Error: Error en el servidor al procesar la solicitud."
+					},
+					"response": []
+				},
+				{
+					"name": "List products - 200 (XML negotiation)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 200', () => pm.response.code === 200);",
+									"pm.test('Content-Type XML', () => pm.response.headers.get('Content-Type').includes('application/xml'));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "{{apiKey}}"
+							},
+							{
+								"key": "Accept",
+								"value": "application/xml"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/productos?page=1&limit=1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"productos"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List products - 422 invalid pagination",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 422', () => pm.response.code === 422);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "{{apiKey}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/productos?page=0&limit=0",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"productos"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "limit",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List products - 401 missing API key",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 401', () => pm.response.code === 401);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/productos?page=1&limit=1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"productos"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get product by id - 200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 200', () => pm.response.code === 200);",
+									"const json = pm.response.json();",
+									"pm.expect(json.data).to.have.property('id');"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "{{apiKey}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/productos/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"productos",
+								"1"
+							]
+						},
+						"description": "Este endpoint realiza una solicitud GET para obtener los detalles de un producto específico identificado por su ID en la ruta.\n\nEncabezados requeridos:\n- x-api-key: Clave de API para autenticación.\n\nParámetros de ruta:\n- 1: ID del producto que se desea obtener.\n\nFormato de respuesta esperada:\n- JSON con la estructura que incluye una propiedad 'data' que contiene el objeto del producto.\n\nCódigos de estado HTTP posibles:\n- 200 OK: La solicitud fue exitosa y se devolvió el producto.\n- 404 Not Found: No se encontró un producto con el ID especificado.\n- 401 Unauthorized: La clave de API es inválida o no fue proporcionada.\n- 500 Internal Server Error: Error en el servidor al procesar la solicitud."
+					},
+					"response": []
+				},
+				{
+					"name": "Get product by id - 404 not found",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 404', () => pm.response.code === 404);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "{{apiKey}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/productos/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"productos",
+								"999999"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get product by id - 422 invalid id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 422', () => pm.response.code === 422);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "{{apiKey}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/productos/abc",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"productos",
+								"abc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create product - 201",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 201', () => pm.response.code === 201);",
+									"const json = pm.response.json();",
+									"pm.collectionVariables.set('productId', json.data.id);",
+									"pm.collectionVariables.set('lastSku', json.data.sku);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"sku\": \"{{skuUnique}}\",\n  \"name\": \"Producto de prueba\",\n  \"description\": \"Creado via Postman\",\n  \"price\": 9.99,\n  \"category\": \"Test\",\n  \"stock\": 5\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/productos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"productos"
+							]
+						},
+						"description": "Este endpoint permite crear un nuevo producto en el sistema.\n\nEncabezados requeridos:\n- Authorization: Token Bearer para autenticación.\n- Content-Type: application/json para indicar que el cuerpo está en formato JSON.\n\nParámetros del cuerpo:\n- sku: Identificador único del producto.\n- name: Nombre del producto.\n- description: Descripción detallada del producto.\n- price: Precio del producto (decimal).\n- category: Categoría a la que pertenece el producto.\n- stock: Cantidad disponible en inventario.\n\nFormato de la respuesta esperada:\n- JSON con los datos del producto creado, incluyendo su ID y SKU.\n\nCódigos de estado HTTP posibles:\n- 201: Producto creado exitosamente.\n- 400: Solicitud inválida, datos incorrectos o faltantes.\n- 401: No autorizado, token inválido o ausente.\n- 500: Error interno del servidor."
+					},
+					"response": []
+				},
+				{
+					"name": "Create product - 409 SKU conflict",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 409', () => pm.response.code === 409);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"sku\": \"{{lastSku}}\",\n  \"name\": \"Duplicado\",\n  \"description\": \"SKU duplicado\",\n  \"price\": 10,\n  \"category\": \"Test\",\n  \"stock\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/productos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"productos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create product - 401 missing JWT",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 401', () => pm.response.code === 401);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"sku\": \"SKU-NOAUTH\",\n  \"name\": \"Sin token\",\n  \"description\": \"Debe fallar\",\n  \"price\": 10,\n  \"category\": \"Test\",\n  \"stock\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/productos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"productos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create product - 403 viewer (rol insuficiente)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 403', () => pm.response.code === 403);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{viewerToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"sku\": \"SKU-VIEWER-{{skuUnique}}\",\n  \"name\": \"No permitido\",\n  \"description\": \"Debe fallar 403\",\n  \"price\": 10,\n  \"category\": \"Test\",\n  \"stock\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/productos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"productos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update product - 200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 200', () => pm.response.code === 200);",
+									"const json = pm.response.json();",
+									"pm.expect(json.data.price).to.eql(19.99);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"price\": 19.99\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/productos/{{productId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"productos",
+								"{{productId}}"
+							]
+						},
+						"description": "Este endpoint permite actualizar un producto existente en la base de datos mediante una solicitud PUT.\n\nEncabezados requeridos:\n- Authorization: Token Bearer para autenticación.\n- Content-Type: application/json para indicar que el cuerpo de la solicitud está en formato JSON.\n\nParámetros de ruta:\n- productId: Identificador único del producto que se desea actualizar.\n\nParámetros del cuerpo:\n- price: Nuevo precio del producto (ejemplo: 19.99).\n\nFormato de la respuesta esperada:\n- JSON con los datos actualizados del producto.\n\nCódigos de estado HTTP posibles:\n- 200 OK: Producto actualizado correctamente.\n- 400 Bad Request: Datos inválidos en la solicitud.\n- 401 Unauthorized: Token de autenticación inválido o ausente.\n- 404 Not Found: Producto no encontrado con el productId proporcionado.\n- 500 Internal Server Error: Error en el servidor al procesar la solicitud."
+					},
+					"response": []
+				},
+				{
+					"name": "Update product - 409 duplicate SKU",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 409', () => pm.response.code === 409);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"sku\": \"LAP-GAM-001\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/productos/{{productId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"productos",
+								"{{productId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete product - 200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 200', () => pm.response.code === 200);",
+									"const json = pm.response.json();",
+									"pm.expect(json.data).to.have.property('id');"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/productos/{{productId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"productos",
+								"{{productId}}"
+							]
+						},
+						"description": "Este endpoint permite eliminar un producto existente en el sistema mediante su identificador único (productId).\n\nEncabezados requeridos:\n- Authorization: Bearer token para autenticación y autorización.\n\nParámetro de ruta:\n- productId: Identificador único del producto que se desea eliminar.\n\nFormato de la respuesta esperada:\n- JSON con una propiedad 'data' que contiene información del producto eliminado.\n\nPosibles códigos de estado HTTP:\n- 200 OK: Producto eliminado exitosamente.\n- 400 Bad Request: Solicitud inválida, por ejemplo, si el productId no es válido.\n- 401 Unauthorized: Token de autorización ausente o inválido.\n- 404 Not Found: Producto con el productId especificado no encontrado.\n- 500 Internal Server Error: Error interno del servidor al procesar la solicitud."
+					},
+					"response": []
+				},
+				{
+					"name": "Get deleted product - 404",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status 404', () => pm.response.code === 404);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "{{apiKey}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/productos/{{productId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"productos",
+								"{{productId}}"
+							]
+						},
+						"description": "Este endpoint permite obtener la información de un producto específico mediante su ID.\n\nEncabezados requeridos:\n- x-api-key: Clave de API para autenticación.\n\nParámetro de ruta:\n- productId: ID único del producto que se desea obtener.\n\nFormato de respuesta esperada:\n- JSON con los detalles del producto.\n\nCódigos de estado HTTP posibles:\n- 200 OK: Producto encontrado y datos devueltos correctamente.\n- 404 Not Found: Producto no encontrado con el ID proporcionado.\n- 401 Unauthorized: Clave de API inválida o no proporcionada.\n- 500 Internal Server Error: Error interno del servidor al procesar la solicitud."
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"requests": {},
+				"exec": [
+					"if (!pm.collectionVariables.get('skuUnique')) {",
+					"  pm.collectionVariables.set('skuUnique', 'SKU-' + Date.now());",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000"
+		},
+		{
+			"key": "apiKey",
+			"value": "123456"
+		},
+		{
+			"key": "token",
+			"value": ""
+		},
+		{
+			"key": "viewerToken",
+			"value": ""
+		},
+		{
+			"key": "productId",
+			"value": ""
+		},
+		{
+			"key": "skuUnique",
+			"value": ""
+		}
+	]
+}

@@ -1,0 +1,57 @@
+[
+  {
+    "id": 1,
+    "sku": "LAP-GAM-001",
+    "name": "Laptop Gaming",
+    "description": "Laptop para gaming de alta gama",
+    "price": 1500,
+    "category": "Electronics",
+    "stock": 10,
+    "createdAt": "2025-10-03T10:00:00.000Z",
+    "updatedAt": "2025-10-03T10:00:00.000Z"
+  },
+  {
+    "id": 2,
+    "sku": "MOU-WIR-002",
+    "name": "Mouse Wireless",
+    "description": "Mouse inalámbrico ergonómico",
+    "price": 45.99,
+    "category": "Electronics",
+    "stock": 25,
+    "createdAt": "2025-10-03T10:00:00.000Z",
+    "updatedAt": "2025-10-03T10:00:00.000Z"
+  },
+  {
+    "id": 3,
+    "sku": "KEY-MEC-003",
+    "name": "Teclado Mecánico",
+    "description": "Teclado mecánico RGB para gaming",
+    "price": 89.99,
+    "category": "Electronics",
+    "stock": 15,
+    "createdAt": "2025-10-03T10:00:00.000Z",
+    "updatedAt": "2025-10-03T10:00:00.000Z"
+  },
+  {
+    "id": 4,
+    "sku": "MON-4K-004",
+    "name": "Monitor 4K",
+    "description": "Monitor 4K de 27 pulgadas",
+    "price": 399.99,
+    "category": "Electronics",
+    "stock": 8,
+    "createdAt": "2025-10-03T10:00:00.000Z",
+    "updatedAt": "2025-10-03T10:00:00.000Z"
+  },
+  {
+    "id": 5,
+    "sku": "AUD-BT-005",
+    "name": "Audífonos Bluetooth",
+    "description": "Audífonos inalámbricos con cancelación de ruido",
+    "price": 129.99,
+    "category": "Electronics",
+    "stock": 20,
+    "createdAt": "2025-10-03T10:00:00.000Z",
+    "updatedAt": "2025-10-03T10:00:00.000Z"
+  }
+]

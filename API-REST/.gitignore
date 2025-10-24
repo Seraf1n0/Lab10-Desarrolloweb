@@ -1,0 +1,71 @@
+# Dependencies
+node_modules/
+pnpm-lock.yaml
+yarn.lock
+package-lock.json
+
+# Build output
+dist/
+build/
+coverage/
+.nyc_output/
+
+# Logs & diagnostics
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+report.[0-9]*.json
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# OS / Editor junk
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+*.iml
+
+# Caches
+.cache/
+.tmp/
+temp/
+tmp/
+.eslintcache
+.prettier-cache
+.tsbuildinfo
+
+# TypeScript
+*.tsbuildinfo
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Optional tools
+coverage-final.json
+/.husky/_/
+.husky/_
+
+# Docker
+docker-data/
+docker-compose.override.yml
+
+# Local files
+*.local.*
+
+# Fastify plugins auto-gen (if any)
+fastify.log
+
+# Misc
+*.tgz
+*.orig

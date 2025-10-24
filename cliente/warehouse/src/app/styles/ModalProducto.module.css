@@ -1,0 +1,151 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(8,32,58,0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: 0 20px 60px rgba(15,23,36,0.2);
+  width: 100%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem;
+  border-bottom: 1px solid rgba(8,32,58,0.08);
+}
+
+.header h2 {
+  margin: 0;
+  color: var(--primary);
+  font-size: 1.4rem;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.closeButton:hover {
+  background: rgba(8,32,58,0.06);
+  color: var(--foreground);
+}
+
+.controls {
+  display: flex;
+  gap: 0.5rem;
+  padding: 1rem 1.25rem 0;
+}
+
+.toggle {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(8,32,58,0.08);
+  background: var(--surface);
+  color: var(--muted);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.12s ease;
+}
+
+.toggle.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.content {
+  flex: 1;
+  padding: 1.25rem;
+  overflow-y: auto;
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.field label {
+  font-size: 0.9rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.field span {
+  color: var(--foreground);
+}
+
+.price {
+  font-weight: 600;
+  color: var(--primary);
+  font-size: 1.1rem;
+}
+
+.inStock {
+  color: var(--success);
+  font-weight: 500;
+}
+
+.outStock {
+  color: var(--danger);
+  font-weight: 500;
+}
+
+.rawData {
+  background: #f8f9fa;
+  border: 1px solid rgba(8,32,58,0.08);
+  border-radius: 6px;
+  padding: 1rem;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: #ff6600;
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 640px) {
+  .modal {
+    margin: 0.5rem;
+    max-height: 90vh;
+  }
+  
+  .header, .content {
+    padding: 1rem;
+  }
+}

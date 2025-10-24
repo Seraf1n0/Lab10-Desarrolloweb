@@ -1,0 +1,26 @@
+.navbar-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1rem;
+  background: linear-gradient(90deg, #0f67d4 0%, #123fb0 60%, #8a2be2 100%);
+  color: #ffffff;
+  box-shadow: 0 6px 18px rgba(15,23,36,0.08);
+  border-radius: 8px;
+}
+
+.navbar-title {
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: 0.2px;
+}
+
+.navbar-badge {
+  font-size: 0.85rem;
+  background: rgba(255,255,255,0.08);
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+}
