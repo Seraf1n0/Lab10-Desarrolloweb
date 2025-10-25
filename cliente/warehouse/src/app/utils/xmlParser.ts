@@ -87,7 +87,14 @@ export function parseProductsListXML(xmlString: string): { products: Product[], 
       products.push(product);
     });
 
-    return { products };
+    const paginationInfo = {
+      page: parseInt(xmlDoc.querySelector('pagination > page')?.textContent || '1'),
+      limit: parseInt(xmlDoc.querySelector('pagination > limit')?.textContent || '10'),
+      total: parseInt(xmlDoc.querySelector('pagination > total')?.textContent || '0'),
+      totalPages: parseInt(xmlDoc.querySelector('pagination > totalPages')?.textContent || '1')
+    };
+
+    return { products, pagination: paginationInfo };
   } catch (error) {
     console.error('Error parsing products XML:', error);
     return { products: [] };

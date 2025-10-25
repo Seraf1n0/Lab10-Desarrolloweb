@@ -54,26 +54,32 @@ const productRoutes: FastifyPluginAsync = async (fastify, options) => {
         // Implementación de negociación de contenido: XML
         if (acceptHeader?.includes('application/xml')) {
           const xml = `<?xml version="1.0" encoding="UTF-8"?>
-          <response>
-            <code>PRODUCTS_RETRIEVED</code>
-            <message>Products retrieved successfully</message>
-            <data>
-              <products>
-                ${paginatedProducts.map(p => `
-                  <product>
-                    <id>${p.id}</id>
-                    <sku>${p.sku}</sku>
-                    <name>${p.name}</name>
-                    <description>${p.description}</description>
-                    <price>${p.price}</price>
-                    <category>${p.category}</category>
-                    <stock>${p.stock}</stock>
-                  </product>
-                `).join('')}
-              </products>
-            </data>
-            <timestamp>${new Date().toISOString()}</timestamp>
-          </response>`;
+<response>
+  <code>PRODUCTS_RETRIEVED</code>
+  <message>Products retrieved successfully</message>
+  <data>
+    <products>
+      ${paginatedProducts.map(p => `
+        <product>
+          <id>${p.id}</id>
+          <sku>${p.sku}</sku>
+          <name>${p.name}</name>
+          <description>${p.description}</description>
+          <price>${p.price}</price>
+          <category>${p.category}</category>
+          <stock>${p.stock}</stock>
+        </product>
+      `).join('')}
+    </products>
+    <pagination>
+      <page>${page}</page>
+      <limit>${limit}</limit>
+      <total>${products.length}</total>
+      <totalPages>${Math.ceil(products.length / limit)}</totalPages>
+    </pagination>
+  </data>
+  <timestamp>${new Date().toISOString()}</timestamp>
+</response>`;
           
           return reply.type('application/xml').status(200).send(xml); // 200 OK
         }
