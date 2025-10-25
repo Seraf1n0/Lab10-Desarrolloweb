@@ -5,14 +5,17 @@ import Navbar from "./components/Navbar";
 import Filtros from "./components/Filtros";
 import CardProducto from "./components/CardProducto";
 import ModalProducto from "./components/ModalProducto";
-import { Product, ProductResumen } from "./types/Product";
+import { ProductResumen } from "./types/Product";
+import { fetchProducts } from "./services/api";
 
 export default function Home() {
   const [productos, setProductos] = useState<ProductResumen[]>([]);
-  const [productoSeleccionado, setProductoSeleccionado] = useState<Product | null>(null);
+  const [productoSeleccionadoId, setProductoSeleccionadoId] = useState<number | null>(null);
   const [modalAbierto, setModalAbierto] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
-  // Estados para manejar los props de filtros (no se si es la forma mas eficiente)
+  // Estados para manejar los props de filtros
   const [formato, setFormato] = useState<"json" | "xml">("json");
   const [pageSize, setPageSize] = useState<number>(10);
   const [sort, setSort] = useState<"nombre_asc" | "nombre_desc" | "price_asc" | "price_desc">("nombre_asc");
@@ -20,17 +23,11 @@ export default function Home() {
   // Estados para la paginación (inicia en 1)
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
 
-  // Datos llenados con API
-  const productosTotales: ProductResumen[];
-
-  const productosCompletos: Product[];
-
-  const aplicarFiltros = (productos: ProductResumen[]) => {
-    const productosFiltrados = [...productos];
-
-    // Aplicar ordenamiento
-    productosFiltrados.sort((a, b) => {
+  // Ordenamiento local (porque no tenemos sort en el api)
+  const aplicarOrdenamiento = (productos: ProductResumen[]) => {
+    return [...productos].sort((a, b) => {
       switch (sort) {
         case "nombre_asc":
           return a.name.localeCompare(b.name);
@@ -44,53 +41,69 @@ export default function Home() {
           return 0;
       }
     });
-
-    return productosFiltrados;
   };
 
-  // Función para obtener productos paginados
-  const obtenerProductosPaginados = (productos: ProductResumen[]) => {
-    const startIndex = (currentPage - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    return productos.slice(startIndex, endIndex);
-  };
+  // LOAD de productos
+  const cargarProductos = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const { products, pagination } = await fetchProducts(currentPage, pageSize, formato);
+      
+      // Convertir productos de la API a ProductResumen
+      const productosResumen: ProductResumen[] = products.map(p => ({
+        id: p.id,
+        sku: p.sku,
+        name: p.name,
+        price: p.price
+      }));
 
-  // En el evento de cambio de filtros o paginación
-  useEffect(() => {
-    const productosFiltrados = aplicarFiltros(productosTotales);
-    // Se calcula con ceiling para redondear hacia arriba
-    const totalPaginas = Math.ceil(productosFiltrados.length / pageSize);
-    
-    setTotalPages(totalPaginas);
-    
-    if (currentPage > totalPaginas && totalPaginas > 0) {
-      setCurrentPage(1);
+      // Aplicar ordenamiento local si es necesario
+      const productosOrdenados = aplicarOrdenamiento(productosResumen);
+      
+      setProductos(productosOrdenados);
+      setTotalPages(pagination.totalPages);
+      setTotalProducts(pagination.total);
+      
+    } catch (error) {
+      console.error('Error loading products:', error);
+      setError('Error al cargar los productos. Verifica que la API esté ejecutándose.');
+    } finally {
+      setLoading(false);
     }
-    
-    const productosPaginados = obtenerProductosPaginados(productosFiltrados);
-    setProductos(productosPaginados);
-  }, [pageSize, sort, currentPage]);
+  };
+
+  // Se cargan productos cuando cambia pagina o filtrado
+  useEffect(() => {
+    cargarProductos();
+  }, [currentPage, pageSize, formato]);
+
+  // Se recarga cuando se cambie el ordenamiento
+  useEffect(() => {
+    if (productos.length > 0) {
+      const productosOrdenados = aplicarOrdenamiento(productos);
+      setProductos(productosOrdenados);
+    }
+  }, [sort]);
 
   // cuando cambie pageSize o sort se reinicia a pagina 1 (Porque con el filtro el total de paginas puede cambiar)
   useEffect(() => {
     setCurrentPage(1);
-  }, [pageSize, sort]);
+  }, [pageSize, formato]);
 
+  // abrimos el modal con el id cargado
   const handleVerDetalles = (id: number) => {
-    // cambiamo a = fetch api
-    const producto = productosCompletos.find((p) => p.id === id);
-    if (producto) {
-      setProductoSeleccionado(producto);
-      setModalAbierto(true);
-    }
+    setProductoSeleccionadoId(id);
+    setModalAbierto(true);
   };
 
   const cerrarModal = () => {
     setModalAbierto(false);
-    setProductoSeleccionado(null);
+    setProductoSeleccionadoId(null);
   };
 
-  // Funciones para paginacion con validacion para no ir a pagina -1 xd
+  // Funciones de paginación
   const irPaginaAnterior = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
@@ -123,30 +136,42 @@ export default function Home() {
             <h2>Productos en Inventario</h2>
             <p>Consulta y gestiona los productos de nuestro almacén.</p>
 
+            {/* Manejo de errores*/}
+            {error && (
+              <div className={styles.error}>
+                {error}
+              </div>
+            )}
+
             {/* Resumen de paginas */}
             <div className={styles.info}>
               <span>
-                Página {currentPage} de {totalPages} | {productos.length} productos mostrados
+                Página {currentPage} de {totalPages} | {productos.length} productos mostrados de {totalProducts} total
               </span>
             </div>
 
-            <div className={styles.grid}>
-              {productos.map((producto) => (
-                <CardProducto
-                  key={producto.id}
-                  producto={producto}
-                  onVerDetalles={handleVerDetalles}
-                />
-              ))}
-            </div>
+            {loading ? (
+              <div className={styles.loading}>
+                Cargando productos...
+              </div>
+            ) : (
+              <div className={styles.grid}>
+                {productos.map((producto) => (
+                  <CardProducto
+                    key={producto.id}
+                    producto={producto}
+                    onVerDetalles={handleVerDetalles}
+                  />
+                ))}
+              </div>
+            )}
 
-            {/* Controles de paginación */}
             {totalPages > 1 && (
               <div className={styles.pagination}>
                 <button 
                   className={styles.pageButton}
                   onClick={irPaginaAnterior}
-                  disabled={currentPage === 1}
+                  disabled={currentPage === 1 || loading}
                 >
                   Anterior
                 </button>
@@ -156,7 +181,7 @@ export default function Home() {
                 <button 
                   className={styles.pageButton}
                   onClick={irPaginaSiguiente}
-                  disabled={currentPage === totalPages}
+                  disabled={currentPage === totalPages || loading}
                 >
                   Siguiente
                 </button>
@@ -166,7 +191,7 @@ export default function Home() {
         </div>
 
         <ModalProducto
-          producto={productoSeleccionado}
+          productId={productoSeleccionadoId}
           isOpen={modalAbierto}
           onClose={cerrarModal}
           formato={formato}

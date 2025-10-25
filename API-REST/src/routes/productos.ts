@@ -143,7 +143,34 @@ const productRoutes: FastifyPluginAsync = async (fastify, options) => {
               path: request.url,
             },
           };
-          return reply.status(404).send(errorResponse); // 404 no se encontró el producto
+          return reply.status(404).send(errorResponse);
+        }
+
+        const acceptHeader = request.headers.accept;
+
+        // Implementación de negociación de contenido: XML
+        if (acceptHeader?.includes('application/xml')) {
+          const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<response>
+  <code>PRODUCT_RETRIEVED</code>
+  <message>Product retrieved successfully</message>
+  <data>
+    <product>
+      <id>${product.id}</id>
+      <sku><![CDATA[${product.sku}]]></sku>
+      <name><![CDATA[${product.name}]]></name>
+      <description><![CDATA[${product.description}]]></description>
+      <price>${product.price}</price>
+      <category><![CDATA[${product.category}]]></category>
+      <stock>${product.stock}</stock>
+      <createdAt>${product.createdAt}</createdAt>
+      <updatedAt>${product.updatedAt}</updatedAt>
+    </product>
+  </data>
+  <timestamp>${new Date().toISOString()}</timestamp>
+</response>`;
+          
+          return reply.type('application/xml').status(200).send(xml);
         }
 
         const successResponse: SuccessResponse<Product> = {

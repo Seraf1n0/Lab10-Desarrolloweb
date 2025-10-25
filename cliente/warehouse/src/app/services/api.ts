@@ -1,7 +1,8 @@
+import { parseProductXML, parseProductsListXML } from '../utils/xmlParser';
 import { Product } from "../types/Product";
 
 const API_BASE_URL = 'http://localhost:3001';
-const API_KEY = 'noseekisde';
+const API_KEY = '123456';
 
 // Modelos de datos para las respuestas de la API
 export interface ApiResponse<T> {
@@ -37,7 +38,7 @@ export async function fetchProducts(
   page: number = 1, 
   limit: number = 10,
   formato: 'json' | 'xml' = 'json'
-): Promise<{ products: Product[], pagination: ProductsResponse['pagination'], rawData?: string }> {
+): Promise<{ products: Product[], pagination: any, rawData?: string }> {
   try {
     const response = await fetch(
       `${API_BASE_URL}/api/productos?page=${page}&limit=${limit}`, 
@@ -54,16 +55,22 @@ export async function fetchProducts(
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
+    const rawData = await response.text();
+
     if (formato === 'xml') {
-      const rawData = await response.text();
-      // aqui falta parsear a XML
+      const { products } = parseProductsListXML(rawData);
       return {
-        products: [],
-        pagination: { page, limit, total: 0, totalPages: 0 },
+        products,
+        pagination: { 
+          page, 
+          limit, 
+          total: products.length, 
+          totalPages: Math.ceil(products.length / limit) 
+        },
         rawData
       };
     } else {
-      const data: ApiResponse<ProductsResponse> = await response.json();
+      const data: ApiResponse<ProductsResponse> = JSON.parse(rawData);
       return {
         products: data.data.products,
         pagination: data.data.pagination,
@@ -97,14 +104,15 @@ export async function fetchProductById(
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
+    const rawData = await response.text();
+
     if (formato === 'xml') {
-      const rawData = await response.text();
+      const product = parseProductXML(rawData);
       return {
-        product: null,
+        product,
         rawData
       };
     } else {
-      const rawData = await response.text();
       const data: ApiResponse<Product> = JSON.parse(rawData);
       return {
         product: data.data,

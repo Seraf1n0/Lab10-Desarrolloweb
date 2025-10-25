@@ -5,41 +5,62 @@ import { fetchProductById } from "../services/api";
 import styles from "../styles/ModalProducto.module.css";
 
 interface ModalProductoProps {
-  producto: Product | null;
+  productId: number | null;
   isOpen: boolean;
   onClose: () => void;
   formato: "json" | "xml";
 }
 
 export default function ModalProducto({
-  producto,
+  productId,
   isOpen,
   onClose,
   formato,
 }: ModalProductoProps) {
   const [showRaw, setShowRaw] = useState(false);
   const [rawData, setRawData] = useState<string>("");
+  const [producto, setProducto] = useState<Product | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Cuando cargue el modal hacemos el fetch del detalle del producto
   useEffect(() => {
-    if (isOpen && producto) {
+    if (isOpen && productId) {
       setLoading(true);
-      fetchProductById(producto.id, formato)
-        .then(({ rawData }) => {
+      setError(null);
+
+      fetchProductById(productId, formato)
+        .then(({ product, rawData }) => {
+          if (formato === "xml" && !product) {
+            setError("No se pudo parsear el XML. Mostrando datos crudos.");
+            setShowRaw(true);
+          } else {
+            setProducto(product);
+          }
           setRawData(rawData);
         })
         .catch((error) => {
           console.error("Error loading product details:", error);
+          setError("Error cargando datos del producto");
           setRawData("Error cargando datos del producto");
         })
         .finally(() => {
           setLoading(false);
         });
     }
-  }, [isOpen, producto?.id, formato]);
+  }, [isOpen, productId, formato]);
 
-  if (!isOpen || !producto) return null;
+  // Limpiar estado cuando se cierre el modal
+  useEffect(() => {
+    if (!isOpen) {
+      setProducto(null);
+      setRawData("");
+      setError(null);
+      setShowRaw(false);
+    }
+  }, [isOpen]);
+
+  if (!isOpen) return null;
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("es-US", {
@@ -52,7 +73,7 @@ export default function ModalProducto({
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
-          <h2>{producto.name}</h2>
+          <h2>{producto?.name || "Cargando..."}</h2>
           <button className={styles.closeButton} onClick={onClose}>
             ×
           </button>
@@ -62,27 +83,34 @@ export default function ModalProducto({
           <button
             className={`${styles.toggle} ${!showRaw ? styles.active : ""}`}
             onClick={() => setShowRaw(false)}
+            disabled={loading}
           >
             Vista Detallada
           </button>
           <button
             className={`${styles.toggle} ${showRaw ? styles.active : ""}`}
             onClick={() => setShowRaw(true)}
+            disabled={loading}
           >
             Raw ({formato.toUpperCase()})
           </button>
         </div>
 
         <div className={styles.content}>
-          {showRaw ? (
-            <div>
-              {loading ? (
-                <div>Cargando datos...</div>
-              ) : (
-                <pre className={styles.rawData}>{rawData}</pre>
-              )}
+          {loading ? (
+            <div className={styles.loadingContent}>
+              <div>Cargando información del producto...</div>
             </div>
-          ) : (
+          ) : error ? (
+            <div className={styles.errorContent}>
+              <div>{error}</div>
+              <button onClick={() => window.location.reload()}>
+                Reintentar
+              </button>
+            </div>
+          ) : showRaw ? (
+            <pre className={styles.rawData}>{rawData}</pre>
+          ) : producto ? (
             <div className={styles.details}>
               <div className={styles.field}>
                 <label>SKU:</label>
@@ -119,7 +147,7 @@ export default function ModalProducto({
                 </span>
               </div>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     </div>
